@@ -1,0 +1,8 @@
+{
+  "name": "king-sports-live-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "KING SPORTS sports-data backend and static frontend",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=20" }
+}
