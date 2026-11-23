@@ -19,3 +19,9 @@ Production hosting
 A static-only host such as drag-and-drop HTML hosting cannot execute this backend. Live data will remain unavailable until the backend is deployed and provider credentials are configured.
 
 See README-LIVE-DATA.txt for refresh intervals and sport coverage limitations. API coverage is not universal; confirm that your provider plan includes the tournaments and lineup fields you want.
+
+F1 DATA CONFIGURATION
+- In Render Environment Variables, set KING_SPORTS_F1_API to the API.SH key.
+- The backend sends it as the x-api-key header; do not put the key in index.html or GitHub.
+- F1 overview requests are cached for 5 minutes to limit API calls. API.SH endpoints are charged in credits; check your account usage.
+- This integration loads the schedule, driver list and constructor list. It does not provide car telemetry or guarantee live timing.

@@ -16,6 +16,8 @@ const PORT = Number(process.env.PORT || 3000);
 const CRICKET_TOKEN = process.env.SPORTMONKS_CRICKET_TOKEN;
 const FOOTBALL_TOKEN = process.env.SPORTMONKS_FOOTBALL_TOKEN;
 const FOOTBALL_DATA_TOKEN = process.env.FOOTBALL_DATA_TOKEN;
+// API.SH Formula 1 key: keep this secret in Render Environment Variables.
+const KING_SPORTS_F1_API = process.env.KING_SPORTS_F1_API;
 const cache = new Map();
 const CACHE_MS = 25_000;
 
@@ -69,6 +71,13 @@ async function football(pathAndQuery) {
     throw new Error(payload.message);
   }
 
+  return payload;
+}
+async function formula1(pathAndQuery) {
+  if (!KING_SPORTS_F1_API) throw new Error('F1 provider not configured. Add KING_SPORTS_F1_API to Render Environment.');
+  const url = `https://api.api.sh/f1/v1${pathAndQuery}`;
+  const payload = await fetchJson(url, { 'x-api-key': KING_SPORTS_F1_API });
+  if (payload && payload.success === false) throw new Error(payload.error || 'API.SH returned an F1 API error.');
   return payload;
 }
 async function footballData(pathAndQuery) {
@@ -205,7 +214,24 @@ function normFootballData(m) {
 async function route(req, res) {
   const u = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   if (req.method === 'OPTIONS') { res.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' }); return res.end(); }
-  if (u.pathname === '/api/health') return json(res, 200, { ok: true, providerConfigured: Boolean(CRICKET_TOKEN), providers: { cricket: CRICKET_TOKEN ? 'configured' : 'needs_api_key', sportmonksFootball: FOOTBALL_TOKEN ? 'configured' : 'needs_api_key', footballData: FOOTBALL_DATA_TOKEN ? 'configured' : 'needs_api_key', football: (FOOTBALL_TOKEN || FOOTBALL_DATA_TOKEN) ? 'configured' : 'needs_api_key' }, refreshSeconds: 25 });
+  if (u.pathname === '/api/health') return json(res, 200, { ok: true, providerConfigured: Boolean(CRICKET_TOKEN), providers: { cricket: CRICKET_TOKEN ? 'configured' : 'needs_api_key', sportmonksFootball: FOOTBALL_TOKEN ? 'configured' : 'needs_api_key', footballData: FOOTBALL_DATA_TOKEN ? 'configured' : 'needs_api_key', football: (FOOTBALL_TOKEN || FOOTBALL_DATA_TOKEN) ? 'configured' : 'needs_api_key', f1: KING_SPORTS_F1_API ? 'configured' : 'needs_api_key' }, refreshSeconds: 25 });
+  if (u.pathname === '/api/f1/overview') {
+    try {
+      const data = await cached('f1-overview', 300_000, async () => {
+        // API.SH charges per successful endpoint call; cache the combined response for five minutes.
+        const [schedule, drivers, constructors] = await Promise.all([
+          formula1('/schedule?count=10'),
+          formula1('/drivers?season=current'),
+          formula1('/constructors?season=current')
+        ]);
+        return { schedule, drivers, constructors };
+      });
+      return json(res, 200, { source: 'API.SH Formula 1 API', updatedAt: new Date().toISOString(), data });
+    } catch (e) {
+      return json(res, 503, { error: e.message, data: null, updatedAt: null });
+    }
+  }
+
   if (u.pathname === '/api/fixtures') {
     try {
       const data = await cached('fixtures', CACHE_MS, async () => {

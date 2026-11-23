@@ -61,10 +61,11 @@
       </div>
       <div class="section-head"><div><span class="eyebrow">Live sports centre</span><h2>Upcoming fixtures</h2><p>Cricket and football schedules update from connected providers.</p></div><button class="secondary" onclick="go('fixtures')">All fixtures →</button></div>
       <div id="homeFixtures" class="feature-grid"></div>
-      <div class="section-head"><div><span class="eyebrow">Pick your arena</span><h2>Two sports. One home.</h2><p>Choose cricket or football to explore fixtures and fantasy squads.</p></div><span class="pill">2 SPORTS AVAILABLE</span></div>
+      <div class="section-head"><div><span class="eyebrow">Pick your arena</span><h2>Three arenas. One home.</h2><p>Explore cricket, football and Formula 1 with connected data feeds.</p></div><span class="pill">CRICKET · FOOTBALL · F1</span></div>
       <div class="sport-grid" id="sportGrid">
         <button class="sport-card" onclick="chooseSport('Cricket')"><span class="sport-icon">🏏</span><strong>Cricket</strong><small>Bat. Bowl. Dominate.</small></button>
         <button class="sport-card" onclick="chooseSport('Football')"><span class="sport-icon">⚽</span><strong>Football</strong><small>Own the pitch.</small></button>
+        <button class="sport-card" onclick="chooseSport('F1')"><span class="sport-icon">🏎️</span><strong>Formula 1</strong><small>Race calendar · drivers · teams</small></button>
       </div>
       <div class="feature-grid">
         <article class="feature"><span class="eyebrow">Your lineup</span><h3>Draft your dream team</h3><p>Build a five-athlete fantasy squad with a 100-credit virtual budget.</p><div class="feature-foot"><span class="muted small">No entry fee. Just strategy.</span><button class="ghost" onclick="go('builder')">Open builder →</button></div></article>
@@ -85,6 +86,10 @@
       </div>
       <div class="section-head"><div><span class="eyebrow">Schedule</span><h2>Cricket fixtures</h2><p>Cricket fixtures and squads load from the cricket provider. Football fixtures and lineups are shown in the football centre below.</p></div></div>
       <p id="fixtureStatus" class="small muted">Connecting to cricket fixture feed…</p><div id="fixtureList" class="feature-grid"></div><div class="section-head"><div><span class="eyebrow">Football schedule</span><h2>Automatically updated football fixtures</h2><p>All leagues available to your football-data plan.</p></div></div><p id="footballFixtureStatus" class="small muted">Connecting to football fixture feed…</p><div id="footballFixtureList" class="feature-grid"></div>
+      <div class="section-head"><div><span class="eyebrow">Formula 1 · API.SH</span><h2>F1 race calendar, drivers & teams</h2><p id="f1Status">Connecting to the API.SH Formula 1 feed…</p></div><button class="secondary" onclick="loadF1Overview()">↻ Refresh F1 data</button></div>
+      <div id="f1ScheduleList" class="feature-grid"><article class="feature"><h3>Loading race calendar…</h3></article></div>
+      <div class="section-head"><div><span class="eyebrow">Current season</span><h2>Drivers & constructors</h2><p>Lists are shown from the configured API.SH response.</p></div></div>
+      <div class="feature-grid"><div class="feature"><h3>Drivers</h3><div id="f1DriversList" class="athlete-list"><div class="roster-empty">Loading drivers…</div></div></div><div class="feature"><h3>Constructors / teams</h3><div id="f1ConstructorsList" class="athlete-list"><div class="roster-empty">Loading teams…</div></div></div></div>
       <div class="notice">KING SPORTS refreshes cricket and football live scores, fixtures and squads automatically when both serverside provider keys are configured. Coverage and update speed depend on the provider plan. Unavailable data is shown as unavailable, never guessed.</div>
       <div class="footer"><span><b>KING SPORTS</b> &nbsp; MATCH CENTRE</span><span>Live data: configured cricket and football providers.</span></div>
       <p class="small muted">Sources: <a style="color:var(--cyan)" href="https://www.bcci.tv/news/article/fixtures-unveiled-for-team-india-s-international-home-season-2026-27" target="_blank" rel="noreferrer">BCCI 2026–27 home fixtures</a> · <a style="color:var(--cyan)" href="https://bbc.com.im/sport/cricket/scores-fixtures/2026-10-11" target="_blank" rel="noreferrer">BBC Sport fixtures for 11 October 2026</a></p>
@@ -95,7 +100,7 @@
         <div class="panel">
           <div class="section-head" style="margin:0 0 14px"><div><h2>Choose athletes</h2><p id="selectedMatchLabel">Match-specific player pool · sample fantasy values</p></div></div>
           <div class="filters" id="sportFilters">
-            <button class="filter active" onclick="setBuilderSport('All',this)">All sports</button><button class="filter" onclick="setBuilderSport('Cricket',this)">🏏 Cricket</button><button class="filter" onclick="setBuilderSport('Football',this)">⚽ Football</button>
+            <button class="filter active" onclick="setBuilderSport('All',this)">All sports</button><button class="filter" onclick="setBuilderSport('Cricket',this)">🏏 Cricket</button><button class="filter" onclick="setBuilderSport('Football',this)">⚽ Football</button><button class="filter" onclick="setBuilderSport('F1',this)">🏎️ F1</button>
           </div>
           <div class="athlete-list" id="athleteList"></div>
           <div id="cricketFantasyPanel" class="panel" style="margin-top:16px">
@@ -111,6 +116,7 @@
             <p class="small muted">Official starting XI and substitutes appear when published by the data provider, usually shortly before kickoff. Select a match from the Football fixtures list.</p>
             <div id="footballRosterPool" class="athlete-list" style="margin-top:12px"><div class="roster-empty">Choose a football fixture to load its lineup.</div></div>
           </div>
+          <div id="f1FantasyPanel" class="panel hidden" style="margin-top:16px"><span class="eyebrow">Formula 1 fantasy · API.SH data</span><h2 style="margin:5px 0">Choose drivers & constructor</h2><p class="small muted">Driver and team information is loaded from API.SH. This preview displays the data feed; fantasy scoring and race-session live timing are separate features and are not claimed here.</p><div id="f1BuilderStatus" class="small muted">Loading F1 data…</div><h3>Drivers</h3><div id="f1BuilderDrivers" class="athlete-list"></div><h3 style="margin-top:14px">Constructors / teams</h3><div id="f1BuilderTeams" class="athlete-list"></div></div>
           <div class="notice">Demo data only: athlete values and points are illustrative, not live match statistics. Real scoring requires a licensed sports data provider.</div>
         </div>
         <aside class="panel roster-panel">
@@ -170,7 +176,7 @@ const shopItems=[
  {id:"credits150",name:"+100 Fantasy Credits",desc:"Permanently raise your fantasy budget by 100 credits. Virtual credits only.",icon:"💠",price:320,type:"credits",amount:100}
 ];
 let state={coins:250,team:[],claimedChallenge:false,claimedWelcome:false,owned:[],saved:false,user:"Guest",sport:"All",activeFixture:"sa-aus-test-1",activeFootballFixture:"",creditBonus:0,cricketMain:[],cricketReserves:[],cricketPool:"All",cricketRole:"main"};
-try{const s=JSON.parse((localStorage.getItem("kingSportsPrototypeState")||localStorage.getItem("nexoraPrototypeState"))||"null");if(s)state={...state,...s}}catch(e){}
+try{const s=JSON.parse(localStorage.getItem("kingSportsPrototypeState")||"null");if(s)state={...state,...s}}catch(e){}
 
 function persist(){try{localStorage.setItem("kingSportsPrototypeState",JSON.stringify(state))}catch(e){}}
 function toast(msg){const root=document.getElementById("toastRoot");root.innerHTML='<div class="toast">'+msg+'</div>';setTimeout(()=>root.innerHTML="",3000)}
@@ -193,11 +199,76 @@ async function refreshFootballFixtures(){const el=document.getElementById('footb
 async function loadFootballLive(){const status=document.getElementById('footballLiveStatus'),list=document.getElementById('footballLiveList');if(!status||!list)return;try{const r=await fetch('/api/football/live');const p=await r.json();if(!r.ok)throw new Error(p.error||'Football live feed unavailable');const matches=p.data||[];status.textContent='Auto-refresh enabled · updated '+new Date(p.updatedAt||Date.now()).toLocaleTimeString()+' · '+matches.length+' live match(es)';list.innerHTML=matches.length?matches.map(f=>`<article class="feature"><span class="pill"><span class="dot"></span> ${escapeHtml(f.status||'LIVE')}</span><h3 style="font-size:18px;margin-top:12px">${escapeHtml(f.home)} <span style="color:var(--cyan)">vs</span> ${escapeHtml(f.away)}</h3><p><b>${escapeHtml(f.score||'Score unavailable')}</b><br>${escapeHtml(f.league||'Football')} · ${escapeHtml(f.venue||'Venue TBA')}</p><div class="feature-foot"><span class="small muted">${escapeHtml(f.elapsed||'')}</span><button class="secondary small" onclick="selectFootballFixture('${String(f.id).replace(/[^0-9]/g,'')}')">Squad →</button></div></article>`).join(''):'<article class="feature"><span class="pill">NO LIVE MATCHES</span><h3>No live football scores in the feed</h3><p>The provider currently reports no matches in progress.</p></article>';}catch(e){status.textContent='Football live feed unavailable · retrying automatically';list.innerHTML=`<article class="feature"><span class="pill">DATA UNAVAILABLE</span><h3>Football scores are unavailable</h3><p>${escapeHtml(e.message)} KING SPORTS will retry automatically.</p></article>`}}
 async function selectFootballFixture(id){state.activeFootballFixture=String(id);state.sport='Football';persist();go('builder');renderAthletes();await renderFootballRoster();toast('Loading official football lineup when available.');}
 async function renderFootballRoster(){const root=document.getElementById('footballRosterPool');if(!root)return;const id=state.activeFootballFixture;if(!id){root.innerHTML='<div class="roster-empty">Choose a football fixture first.</div>';return;}root.innerHTML='<div class="roster-empty">Loading official lineup and substitutes…</div>';try{const r=await fetch('/api/football/fixture/'+encodeURIComponent(id));const p=await r.json();if(!r.ok)throw new Error(p.error||'Lineup unavailable');const teams=p.data?.lineups||[];if(!teams.length){root.innerHTML='<div class="roster-empty">Official starting XI and substitutes are not published by the provider yet. Check again closer to kick-off.</div>';return;}root.innerHTML=teams.map(t=>`<h3>${escapeHtml(t.team||'Team')} · ${escapeHtml(t.formation||'Formation TBA')}</h3>`+(t.players||[]).map(pl=>`<article class="athlete"><div class="avatar">⚽</div><div><strong>${escapeHtml(pl.name||'Player')}</strong><small>${escapeHtml(pl.position||'Player')} · ${escapeHtml(pl.type||'Squad')}</small></div><div class="athlete-right"><b>${escapeHtml(String(pl.number||''))}</b></div></article>`).join('')).join('');}catch(e){root.innerHTML=`<div class="roster-empty">Football lineup unavailable: ${escapeHtml(e.message)}</div>`}}
+function f1Rows(payload, preferred){
+ const candidates=[payload?.data,payload?.results,payload?.response,payload?.[preferred],payload?.data?.[preferred]];
+ for(const value of candidates){if(Array.isArray(value))return value;if(value&&typeof value==='object'){for(const k of ['data','results','items',preferred])if(Array.isArray(value[k]))return value[k];}}
+ return [];
+}
+function f1Name(item){return item?.name||item?.full_name||item?.driver_name||item?.constructor_name||item?.team_name||[item?.givenName,item?.familyName].filter(Boolean).join(' ')||'Name not supplied';}
+async function loadF1Overview(){
+ const status=document.getElementById('f1Status');if(status)status.textContent='Loading schedule, driver and constructor data from API.SH…';
+ try{
+  const response=await fetch('/api/f1/overview');const payload=await response.json();if(!response.ok)throw new Error(payload.error||'F1 data unavailable');
+  const root=payload.data||{};const races=f1Rows(root.schedule,'schedule');const drivers=f1Rows(root.drivers,'drivers');const teams=f1Rows(root.constructors,'constructors');
+  const schedule=document.getElementById('f1ScheduleList');
+  if(schedule)schedule.innerHTML=races.length?races.map(r=>`<article class="feature"><span class="pill">${escapeHtml(r.status||r.round||'F1')}</span><h3>${escapeHtml(r.race_name||r.raceName||r.name||r.grand_prix||'Grand Prix')}</h3><p>${escapeHtml(r.circuit_name||r.circuit?.name||r.circuit||'Circuit details not supplied')}<br>${escapeHtml(r.date||r.race_date||r.start_date||'Session date not supplied')}</p></article>`).join(''):'<article class="feature"><h3>No race schedule returned</h3><p>The API response did not include schedule rows.</p></article>';
+  const driverHtml=drivers.map(d=>`<article class="athlete"><div class="avatar">🏎️</div><div><strong>${escapeHtml(f1Name(d))}</strong><small>${escapeHtml(d.constructor_name||d.team_name||d.team?.name||d.nationality||'F1 driver')}</small></div></article>`).join('');
+  const teamHtml=teams.map(t=>`<article class="athlete"><div class="avatar">🏁</div><div><strong>${escapeHtml(f1Name(t))}</strong><small>${escapeHtml(t.nationality||t.country||'Constructor')}</small></div></article>`).join('');
+  const driversRoot=document.getElementById('f1DriversList'),teamsRoot=document.getElementById('f1ConstructorsList'),builderDrivers=document.getElementById('f1BuilderDrivers'),builderTeams=document.getElementById('f1BuilderTeams');
+  if(driversRoot)driversRoot.innerHTML=driverHtml||'<div class="roster-empty">No driver rows returned by API.SH.</div>';
+  if(teamsRoot)teamsRoot.innerHTML=teamHtml||'<div class="roster-empty">No constructor rows returned by API.SH.</div>';
+  if(builderDrivers)builderDrivers.innerHTML=driverHtml||'<div class="roster-empty">No driver rows returned.</div>';
+  if(builderTeams)builderTeams.innerHTML=teamHtml||'<div class="roster-empty">No constructor rows returned.</div>';
+  const b=document.getElementById('f1BuilderStatus');if(b)b.textContent=`API.SH returned ${drivers.length} driver records, ${teams.length} constructor records and ${races.length} schedule records.`;
+  if(status)status.textContent=`API.SH connected · updated ${new Date(payload.updatedAt||Date.now()).toLocaleTimeString()}`;
+ }catch(e){if(status)status.textContent='F1 feed unavailable: '+e.message;for(const id of ['f1ScheduleList','f1DriversList','f1ConstructorsList','f1BuilderDrivers','f1BuilderTeams']){const el=document.getElementById(id);if(el)el.innerHTML='<div class="roster-empty">F1 data could not be loaded. Check the Render logs and API.SH key configuration.</div>';}const b=document.getElementById('f1BuilderStatus');if(b)b.textContent=e.message;}
+}
 async function loadLiveScores(){const status=document.getElementById('liveStatus'),list=document.getElementById('liveScoreList');if(!status||!list)return;try{const res=await fetch('/api/live');const payload=await res.json();if(!res.ok)throw new Error(payload.error||'Live-score provider unavailable');const matches=Array.isArray(payload.data)?payload.data:[];status.textContent='Auto-refresh enabled · updated '+new Date(payload.updatedAt||Date.now()).toLocaleTimeString()+' · '+matches.length+' live match(es)';if(!matches.length){list.innerHTML='<article class="feature"><span class="pill">NO LIVE MATCHES IN FEED</span><h3>No live cricket scores returned</h3><p>The provider currently returned no live cricket fixtures. The fixture list continues to update separately.</p></article>';return}list.innerHTML=matches.map(m=>{const scores=Array.isArray(m.scores)&&m.scores.length?m.scores.map(x=>`${x.score??'—'}${x.wickets!=null?'/'+x.wickets:''}${x.overs!=null?' ('+x.overs+' ov)':''}`).join(' · '):'Scorecard details unavailable';return `<article class="feature"><span class="pill"><span class="dot"></span> ${escapeHtml(m.status||'LIVE')}</span><h3 style="font-size:18px;margin-top:12px">${escapeHtml(m.home)} <span style="color:var(--cyan)">vs</span> ${escapeHtml(m.away)}</h3><p>${escapeHtml(scores)}<br>${escapeHtml(m.venue||'Venue TBA')}</p><div class="feature-foot"><span class="small muted">${escapeHtml(m.league||'Cricket')} · ${escapeHtml(payload.source||'Live data provider')}</span><button class="secondary small" onclick="selectFixture('${String(m.id).replace(/[^a-zA-Z0-9_-]/g,'')}')">Squads / fantasy →</button></div></article>`}).join('')}catch(e){status.textContent='Live feed unavailable · retrying automatically';list.innerHTML=`<article class="feature"><span class="pill">DATA UNAVAILABLE</span><h3>Live scores are not available right now</h3><p>${escapeHtml(e.message||'Provider connection failed.')}</p><p class="small muted">KING SPORTS will retry automatically. It will not invent scores.</p></article>`}}
 function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 async function openLiveFixture(id){try{const res=await fetch("/api/fixture/"+encodeURIComponent(id));const payload=await res.json();if(!res.ok)throw new Error(payload.error||"Match details unavailable");const m=payload.data||{};showModal("Live match details",`${m.localteam?.name||"Home team"} vs ${m.visitorteam?.name||"Away team"}\nStatus: ${m.status||"Unavailable"}\nDetailed scorecards and lineups depend on provider coverage.`,[{label:"Close",primary:true,action:closeModal}])}catch(e){toast(e.message||"Could not load match details")}}
 function selectFixture(id){state.activeFixture=String(id);state.sport="Cricket";persist();go("builder");renderAthletes();const f=fixtures.find(x=>String(x.id)===String(id));if(f)toast("Selected "+f.home+" vs "+f.away+". Loading official roster from provider.") }
-function renderAthletes(){const cp=document.getElementById("cricketFantasyPanel"),fp=document.getElementById("footballFantasyPanel");if(cp)cp.classList.toggle("hidden",state.sport!=="Cricket");if(fp)fp.classList.toggle("hidden",state.sport!=="Football");if(cp)renderCricketPool();if(fp)renderFootballRoster();const list=document.getElementById("athleteList");const active=fixtures.find(f=>String(f.id)===String(state.activeFixture))||fixtures[0];const matchLabel=document.getElementById("selectedMatchLabel");if(matchLabel&&active&&state.sport==='Cricket')matchLabel.textContent=active.home+" vs "+active.away+" · official roster loads separately";const filtered=[];list.innerHTML=filtered.map(a=>{const selected=state.team.includes(a.id);return `<article class="athlete"><div class="avatar">${a.emoji}</div><div><strong>${a.name}</strong><small>${a.team||a.sport} · ${a.role} · <span style="color:#a9d9ff">${a.points} demo pts</span></small></div><div class="athlete-right"><b>${a.credits} cr</b><button class="${selected?"secondary":"primary"}" ${selected?"onclick='removeAthlete("+a.id+")'":"onclick='addAthlete("+a.id+")'"}>${selected?"− REMOVE":"+ ADD"}</button></div></article>`}).join("")||'<div class="roster-empty">Live matchday players are loaded in the sport-specific squad panel above.</div>';renderTeamStats()}
+function renderAthletes(){
+ const cp=document.getElementById("cricketFantasyPanel"),fp=document.getElementById("footballFantasyPanel"),xp=document.getElementById("f1FantasyPanel");
+ if(cp)cp.classList.toggle("hidden",state.sport!=="Cricket");
+ if(fp)fp.classList.toggle("hidden",state.sport!=="Football");
+ if(xp)xp.classList.toggle("hidden",state.sport!=="F1");
+ if(cp)renderCricketPool();
+ if(fp)renderFootballRoster();
+ if(state.sport==="F1")loadF1Overview();
+ const list=document.getElementById("athleteList");
+ const active=fixtures.find(f=>String(f.id)===String(state.activeFixture))||fixtures[0];
+ const matchLabel=document.getElementById("selectedMatchLabel");
+ if(matchLabel){
+   if(state.sport==="Cricket"&&active)matchLabel.textContent=active.home+" vs "+active.away+" · official roster loads separately";
+   else if(state.sport==="Football")matchLabel.textContent="Football matchday lineup · provider data only";
+   else if(state.sport==="F1")matchLabel.textContent="F1 drivers and constructors · API.SH data";
+   else matchLabel.textContent="Illustrative demo athletes · not a live match roster";
+ }
+ const filtered=state.sport==="All"?athletes:[];
+ list.innerHTML=state.sport==="All"
+   ? '<div class="notice" style="margin:0 0 8px">Illustrative demo player pool only. Choose Cricket or Football above for provider-supplied match rosters.</div>'+filtered.map(a=>{
+      const selected=state.team.includes(a.id);
+      return `<article class="athlete"><div class="avatar">${a.emoji}</div><div><strong>${escapeHtml(a.name)}</strong><small>${escapeHtml(a.team||a.sport)} · ${escapeHtml(a.role)} · <span style="color:#a9d9ff">${a.points} demo pts</span></small></div><div class="athlete-right"><b>${a.credits} cr</b><button class="${selected?"secondary":"primary"}" onclick="${selected?"removeAthlete":"addAthlete"}(${a.id})">${selected?"− REMOVE":"+ ADD"}</button></div></article>`;
+    }).join("")
+   : '<div class="roster-empty">Use the sport-specific panel below. Only provider-returned match data is shown as an official roster.</div>';
+ renderTeamStats();
+}
+function addAthlete(id){
+ const athlete=athletes.find(a=>a.id===Number(id));
+ if(!athlete)return;
+ if(state.team.includes(athlete.id)){toast("That athlete is already in your demo lineup.");return;}
+ if(state.team.length>=5){toast("The demo lineup is limited to 5 athletes.");return;}
+ const used=state.team.reduce((sum,pid)=>sum+(athletes.find(a=>a.id===pid)?.credits||0),0);
+ const budget=100+(state.creditBonus||0);
+ if(used+athlete.credits>budget){toast("That pick exceeds your available virtual credits.");return;}
+ state.team.push(athlete.id);persist();renderAthletes();renderLeaderboard();toast(athlete.name+" added to your demo lineup.");
+}
+function removeAthlete(id){
+ state.team=state.team.filter(pid=>pid!==Number(id));persist();renderAthletes();renderLeaderboard();
+}
+function clearTeam(){
+ state.team=[];persist();renderAthletes();renderLeaderboard();toast("Demo lineup cleared.");
+}
 function renderTeamStats(){const picked=state.team.map(id=>athletes.find(a=>a.id===id)).filter(Boolean);const used=picked.reduce((n,a)=>n+a.credits,0),points=picked.reduce((n,a)=>n+a.points,0);const budget=100+(state.creditBonus||0);document.getElementById("creditsUsed").textContent=used+" / "+budget;document.getElementById("creditsLeft").textContent=Math.max(0,budget-used)+" credits";document.getElementById("budgetBar").style.width=Math.min(100,used/budget*100)+"%";document.getElementById("rosterList").innerHTML=picked.length?picked.map(a=>`<div class="roster-item"><span>${a.emoji} <b>${a.name}</b><br><span class="muted">${a.sport}</span></span><span style="text-align:right"><b>${a.credits} cr</b><br><button onclick="removeAthlete(${a.id})">Remove</button></span></div>`).join(""):'<div class="roster-empty">Your lineup is waiting.<br>Add an athlete to get started.</div>';document.getElementById("homeAthletes").textContent=picked.length+"/5";document.getElementById("homeBudget").textContent=Math.max(0,100+(state.creditBonus||0)-used);document.getElementById("homePoints").textContent=points;document.getElementById("myRank").textContent=picked.length?"#"+String(Math.max(1,8-picked.length)).padStart(2,"0"):"#08"}
 function saveTeam(){if(!state.team.length){toast("Add at least one athlete before saving.");return}state.saved=true;persist();toast("Lineup saved on this device. Real accounts and cloud sync are not connected.");renderAll()}
 function claimChallenge(){if(state.claimedChallenge){toast("Challenge reward already claimed in this demo.");return}state.claimedChallenge=true;state.coins+=25;persist();renderAll();toast("+25 virtual coins earned. Nice move!")}
